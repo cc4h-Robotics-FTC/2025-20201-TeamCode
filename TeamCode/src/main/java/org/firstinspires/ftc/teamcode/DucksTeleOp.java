@@ -4,6 +4,7 @@ import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -16,16 +17,23 @@ public class DucksTeleOp extends LinearOpMode {
     public static double shooterSpinUpPower = 1.0;
     public static double shooterSpinDownPower = 0.0;
 
+    public static int shooterStartTPS = 0;
+    public static int shooterChangeTPS = 100;
+    public static int intakeStartTPS = 0;
+    public static int intakeChangeTPS = 100;
+    public static int transferStartTPS = 0;
+    public static int transferChangeTPS = 100;
+
     // Declare our motors
     // Make sure your ID's match your configuration
-    DcMotor frontLeftMotor = hardwareMap.dcMotor.get("frontLeftMotor");
-    DcMotor frontRightMotor = hardwareMap.dcMotor.get("frontRightMotor");
-    DcMotor backLeftMotor = hardwareMap.dcMotor.get("backLeftMotor");
-    DcMotor backRightMotor = hardwareMap.dcMotor.get("backRightMotor");
-    DcMotor shooterMotor = hardwareMap.dcMotor.get("shooterMotor");
-    DcMotor intakeMotor = hardwareMap.dcMotor.get("intakeMotor");
-
-    Servo kickerServo = hardwareMap.servo.get("kickerServo");
+    DcMotor frontLeftMotor = null;
+    DcMotor frontRightMotor = null;
+    DcMotor backLeftMotor = null;
+    DcMotor backRightMotor = null;
+    DcMotorEx shooterMotor = null;
+    DcMotorEx intakeMotor = null;
+    DcMotorEx transferMotor = null;
+    Servo kickerServo = null;
 
     ElapsedTime shooterTimer = new ElapsedTime();
     ElapsedTime intakeTimer = new ElapsedTime();
@@ -44,6 +52,15 @@ public class DucksTeleOp extends LinearOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException {
+        frontLeftMotor = hardwareMap.get(DcMotor.class, "frontLeftMotor");
+        frontRightMotor = hardwareMap.get(DcMotor.class, "frontRightMotor");
+        backLeftMotor = hardwareMap.get(DcMotor.class, "backLeftMotor");
+        backRightMotor = hardwareMap.get(DcMotor.class, "backRightMotor");
+        shooterMotor = hardwareMap.get(DcMotorEx.class, "shooterMotor");
+        intakeMotor = hardwareMap.get(DcMotorEx.class, "intakeMotor");
+        transferMotor = hardwareMap.get(DcMotorEx.class, "transferMotor");
+        kickerServo = hardwareMap.servo.get("kickerServo");
+
         boolean parked = false;
 
         // Reverse the right side motors. This may be wrong for your setup.
@@ -54,6 +71,12 @@ public class DucksTeleOp extends LinearOpMode {
         backLeftMotor.setDirection(DcMotorSimple.Direction.REVERSE);
 
         shooterMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        intakeMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        transferMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+        int shooterTPS = shooterStartTPS;
+        int intakeTPS = intakeStartTPS;
+        int transferTPS = transferStartTPS;
 
         waitForStart();
         if (isStopRequested()) return;
@@ -61,24 +84,48 @@ public class DucksTeleOp extends LinearOpMode {
             drive();
 //            shoot(gamepad1.a);
 
-            if (gamepad1.x){
-                shooterState = ShooterState.IDLE;
-            }
+//            if (gamepad1.x){
+//                shooterState = ShooterState.IDLE;
+//            }
 
-            shooterMotor.setPower(gamepad1.left_stick_y);
+            if (gamepad1.dpadUpWasPressed()) shooterTPS += shooterChangeTPS;
+            else if (gamepad1.dpadDownWasPressed()) shooterTPS -= shooterChangeTPS;
+            else if (gamepad1.dpadLeftWasPressed()) shooterTPS = -shooterTPS;
 
-            intakeMotor.setPower(gamepad1.left_trigger - gamepad1.right_trigger);
+            if (gamepad1.rightBumperWasPressed()) intakeTPS += intakeChangeTPS;
+            else if (gamepad1.leftBumperWasPressed()) intakeTPS -= intakeChangeTPS;
+            else if (gamepad1.dpadRightWasPressed()) intakeTPS = -intakeTPS;
 
-            if (!gamepad1.dpad_up && !parked) {
-                kickerServo.setPosition(100);
-            } else if (!gamepad1.dpad_up && !parked) {
-                kickerServo.setPosition(100);
-            }
+            if (gamepad1.triangleWasPressed()) transferTPS += transferChangeTPS;
+            else if (gamepad1.crossWasPressed()) transferTPS -= transferChangeTPS;
+            else if (gamepad1.squareWasPressed()) transferTPS = -transferTPS;
 
-            if (gamepad1.dpadDownWasPressed()) {
-                kickerServo.setPosition(0);
-                parked = !parked;
-            }
+            shooterMotor.setVelocity(shooterTPS);
+            intakeMotor.setVelocity(intakeTPS);
+            transferMotor.setVelocity(transferTPS);
+
+//            intakeMotor.setPower(gamepad1.left_trigger - gamepad1.right_trigger);
+
+//            if (!gamepad1.dpad_up && !parked) {
+//                kickerServo.setPosition(100);
+//            } else if (!gamepad1.dpad_up && !parked) {
+//                kickerServo.setPosition(100);
+//            }
+//
+//            if (gamepad1.dpadDownWasPressed()) {
+//                kickerServo.setPosition(0);
+//                parked = !parked;
+//            }
+
+            telemetry.addData("shooter target tps", shooterTPS);
+            telemetry.addData("transfer target tps", transferTPS);
+            telemetry.addData("intake target tps", intakeTPS);
+
+            telemetry.addData("shooter actual tps", shooterMotor.getVelocity());
+            telemetry.addData("transfer actual tps", transferMotor.getVelocity());
+            telemetry.addData("intake actual tps", intakeMotor.getVelocity());
+
+            telemetry.update();
         }
     }
     private void drive() {
