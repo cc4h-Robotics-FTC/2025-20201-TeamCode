@@ -17,11 +17,11 @@ public class DucksTeleOp extends LinearOpMode {
     public static double shooterSpinUpPower = 1.0;
     public static double shooterSpinDownPower = 0.0;
 
-    public static int shooterStartTPS = 0;
+    public static int shooterStartTPS = 1200;
     public static int shooterChangeTPS = 100;
-    public static int intakeStartTPS = 0;
+    public static int intakeStartTPS = 2000;
     public static int intakeChangeTPS = 100;
-    public static int transferStartTPS = 0;
+    public static int transferStartTPS = 2000;
     public static int transferChangeTPS = 100;
 
     // Declare our motors
@@ -70,6 +70,9 @@ public class DucksTeleOp extends LinearOpMode {
         frontLeftMotor.setDirection(DcMotorSimple.Direction.REVERSE);
         backLeftMotor.setDirection(DcMotorSimple.Direction.REVERSE);
 
+        shooterMotor.setDirection(DcMotorSimple.Direction.REVERSE);
+        transferMotor.setDirection(DcMotorSimple.Direction.REVERSE);
+
         shooterMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         intakeMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         transferMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -77,6 +80,9 @@ public class DucksTeleOp extends LinearOpMode {
         int shooterTPS = shooterStartTPS;
         int intakeTPS = intakeStartTPS;
         int transferTPS = transferStartTPS;
+        boolean shooterArmed = false;
+        boolean intakeArmed = false;
+        boolean transferArmed = false;
 
         waitForStart();
         if (isStopRequested()) return;
@@ -88,21 +94,25 @@ public class DucksTeleOp extends LinearOpMode {
 //                shooterState = ShooterState.IDLE;
 //            }
 
-            if (gamepad1.dpadUpWasPressed()) shooterTPS += shooterChangeTPS;
-            else if (gamepad1.dpadDownWasPressed()) shooterTPS -= shooterChangeTPS;
-            else if (gamepad1.dpadLeftWasPressed()) shooterTPS = -shooterTPS;
+            if (gamepad1.dpadUpWasPressed()) { shooterTPS += shooterChangeTPS; }
+            else if (gamepad1.dpadDownWasPressed()) { shooterTPS -= shooterChangeTPS; }
+            else if (gamepad1.dpadLeftWasPressed()) { shooterTPS = -shooterTPS; }
+            else if (gamepad1.dpadRightWasPressed()) { shooterArmed = !shooterArmed; }
 
-            if (gamepad1.rightBumperWasPressed()) intakeTPS += intakeChangeTPS;
-            else if (gamepad1.leftBumperWasPressed()) intakeTPS -= intakeChangeTPS;
-            else if (gamepad1.dpadRightWasPressed()) intakeTPS = -intakeTPS;
+//            if (gamepad1.triangleWasPressed()) { intakeTPS += intakeChangeTPS; transferTPS += transferChangeTPS; }
+//            else if (gamepad1.crossWasPressed()) { intakeTPS -= intakeChangeTPS; transferTPS -= transferChangeTPS; }
+//            else if (gamepad1.squareWasPressed()) { intakeTPS = -intakeTPS; transferTPS = -transferTPS; }
+//            else if (gamepad1.circleWasPressed()) { intakeArmed = !intakeArmed; transferArmed = !transferArmed; }
 
-            if (gamepad1.triangleWasPressed()) transferTPS += transferChangeTPS;
-            else if (gamepad1.crossWasPressed()) transferTPS -= transferChangeTPS;
-            else if (gamepad1.squareWasPressed()) transferTPS = -transferTPS;
+            if (gamepad1.squareWasPressed()) { intakeTPS = -intakeTPS; }
+            if (gamepad1.triangleWasPressed()) { transferTPS = -transferTPS; }
+            intakeArmed = gamepad1.cross;
+            transferArmed = gamepad1.circle;
 
-            shooterMotor.setVelocity(shooterTPS);
-            intakeMotor.setVelocity(intakeTPS);
-            transferMotor.setVelocity(transferTPS);
+
+            shooterMotor.setVelocity(shooterTPS * (shooterArmed ? 1: 0));
+            intakeMotor.setVelocity(intakeTPS * (intakeArmed ? 1 : 0));
+            transferMotor.setVelocity(transferTPS * (transferArmed ? 1 : 0));
 
 //            intakeMotor.setPower(gamepad1.left_trigger - gamepad1.right_trigger);
 
@@ -124,6 +134,10 @@ public class DucksTeleOp extends LinearOpMode {
             telemetry.addData("shooter actual tps", shooterMotor.getVelocity());
             telemetry.addData("transfer actual tps", transferMotor.getVelocity());
             telemetry.addData("intake actual tps", intakeMotor.getVelocity());
+
+            telemetry.addData("shooter armed", shooterArmed);
+            telemetry.addData("transfer armed", transferArmed);
+            telemetry.addData("intake armed", intakeArmed);
 
             telemetry.update();
         }
