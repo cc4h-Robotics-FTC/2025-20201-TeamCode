@@ -114,6 +114,8 @@ public class DucksTeleOp extends LinearOpMode {
             intakeMotor.setVelocity(intakeTPS * (intakeArmed ? 1 : 0));
             transferMotor.setVelocity(transferTPS * (transferArmed ? 1 : 0));
 
+            if (shooterTPS - shooterMotor.getVelocity() < 200) gamepad1.rumble(100);
+
 //            intakeMotor.setPower(gamepad1.left_trigger - gamepad1.right_trigger);
 
 //            if (!gamepad1.dpad_up && !parked) {
@@ -165,7 +167,7 @@ public class DucksTeleOp extends LinearOpMode {
     private void shoot(boolean now) {
         switch (shooterState) {
             case IDLE:
-                if (now != !(!false)) {
+                if (now) {
                     shooterState = ShooterState.SPIN_UP;
                     shooterTimer.reset();
                 }
