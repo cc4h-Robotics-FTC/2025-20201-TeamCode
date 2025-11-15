@@ -114,7 +114,8 @@ public class DucksTeleOp extends LinearOpMode {
             intakeMotor.setVelocity(intakeTPS * (intakeArmed ? 1 : 0));
             transferMotor.setVelocity(transferTPS * (transferArmed ? 1 : 0));
 
-            if (shooterTPS - shooterMotor.getVelocity() < 200) gamepad1.rumble(100);
+            if (shooterMotor.getVelocity() > shooterTPS - 200) gamepad1.rumble(100);
+            else gamepad1.stopRumble();
 
 //            intakeMotor.setPower(gamepad1.left_trigger - gamepad1.right_trigger);
 
