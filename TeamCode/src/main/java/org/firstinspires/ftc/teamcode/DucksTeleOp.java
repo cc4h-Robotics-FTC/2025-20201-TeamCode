@@ -80,6 +80,8 @@ public class DucksTeleOp extends LinearOpMode {
         intakeMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         transferMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
+        Shooter shooter = new Shooter(intakeMotor, transferMotor, shooterMotor);
+
         int shooterTPS = shooterStartTPS;
         int intakeTPS = intakeStartTPS;
         int transferTPS = transferStartTPS;
@@ -91,7 +93,8 @@ public class DucksTeleOp extends LinearOpMode {
         if (isStopRequested()) return;
         while (opModeIsActive()) {
             drive();
-//            shoot(gamepad1.a);
+//            shooter.shoot(gamepad1.right_bumper, gamepad1.left_bumper, shooterTPS);
+//            shoot(gamepad1.a);1
 
 //            if (gamepad1.x){
 //                shooterState = ShooterState.IDLE;
