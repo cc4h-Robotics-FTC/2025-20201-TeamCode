@@ -50,6 +50,9 @@ public class DucksTeleOp extends LinearOpMode {
     }
     ShooterState shooterState = ShooterState.IDLE;
 
+    double moveSens = 1.0;
+    double turnSens = 1.0;
+
     @Override
     public void runOpMode() throws InterruptedException {
         frontLeftMotor = hardwareMap.get(DcMotor.class, "frontLeftMotor");
@@ -102,17 +105,20 @@ public class DucksTeleOp extends LinearOpMode {
 //            if (gamepad1.triangleWasPressed()) { intakeTPS += intakeChangeTPS; transferTPS += transferChangeTPS; }
 //            else if (gamepad1.crossWasPressed()) { intakeTPS -= intakeChangeTPS; transferTPS -= transferChangeTPS; }
 //            else if (gamepad1.squareWasPressed()) { intakeTPS = -intakeTPS; transferTPS = -transferTPS; }
-//            else if (gamepad1.circleWasPressed()) { intakeArmed = !intakeArmed; transferArmed = !transferArmed; }
-
-            if (gamepad1.squareWasPressed()) { intakeTPS = -intakeTPS; }
-            if (gamepad1.triangleWasPressed()) { transferTPS = -transferTPS; }
-            intakeArmed = gamepad1.cross;
-            transferArmed = gamepad1.circle;
+////            else if (gamepad1.circleWasPressed()) { intakeArmed = !intakeArmed; transferArmed = !transferArmed; }
+//
+//            if (gamepad1.squareWasPressed()) { intakeTPS = -intakeTPS; }
+//            if (gamepad1.triangleWasPressed()) { transferTPS = -transferTPS; }
+//            intakeArmed = gamepad1.cross;
+//            transferArmed = gamepad1.circle;
 
 
             shooterMotor.setVelocity(shooterTPS * (shooterArmed ? 1: 0));
-            intakeMotor.setVelocity(intakeTPS * (intakeArmed ? 1 : 0));
-            transferMotor.setVelocity(transferTPS * (transferArmed ? 1 : 0));
+            if (gamepad1.left_bumper && gamepad1.right_bumper) shooterMotor.setPower(1.0);
+            intakeMotor.setPower((gamepad1.cross ? 1 : 0) - (gamepad1.square ? 1 : 0));
+            transferMotor.setPower((gamepad1.circle ? 1 : 0) - (gamepad1.triangle ? 1 : 0));
+//            intakeMotor.setVelocity(intakeTPS * (intakeArmed ? 1 : 0));
+//            transferMotor.setVelocity(transferTPS * (transferArmed ? 1 : 0));
 
             if (shooterMotor.getVelocity() > shooterTPS - 200) gamepad1.rumble(100);
             else gamepad1.stopRumble();
@@ -146,9 +152,14 @@ public class DucksTeleOp extends LinearOpMode {
         }
     }
     private void drive() {
-        double y = -gamepad1.right_stick_y; // Remember, Y stick value is reversed
-        double x = gamepad1.right_stick_x * 1.1; // Counteract imperfect strafing
-        double rx = gamepad1.left_stick_x;
+        if (gamepad2.dpadUpWasPressed()) moveSens += 0.05;
+        if (gamepad2.dpadDownWasPressed()) moveSens -= 0.05;
+        if (gamepad2.triangleWasPressed()) turnSens += 0.05;
+        if (gamepad2.crossWasPressed()) turnSens -= 0.05;
+
+        double y = -gamepad2.left_stick_y * moveSens; // Remember, Y stick value is reversed
+        double x = gamepad2.left_stick_x * 1.1 * moveSens; // Counteract imperfect strafing
+        double rx = gamepad2.right_stick_x * turnSens;
 
         // Denominator is the largest motor power (absolute value) or 1
         // This ensures all the powers maintain the same ratio,
@@ -173,6 +184,7 @@ public class DucksTeleOp extends LinearOpMode {
                     shooterTimer.reset();
                 }
                 break;
+
             case SPIN_UP:
                 shooterMotor.setPower(shooterSpinDownPower);
                 if (shooterTimer.seconds() >= shooterSpinUpTime) {
