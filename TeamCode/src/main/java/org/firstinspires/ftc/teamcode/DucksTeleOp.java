@@ -1,6 +1,9 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.acmerobotics.dashboard.config.Config;
+import com.bylazar.configurables.annotations.Configurable;
+import com.bylazar.telemetry.JoinedTelemetry;
+import com.bylazar.telemetry.PanelsTelemetry;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -10,6 +13,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 @Config
+@Configurable
 @TeleOp
 public class DucksTeleOp extends LinearOpMode {
     public static double shooterSpinUpTime = 3.0;
@@ -34,6 +38,8 @@ public class DucksTeleOp extends LinearOpMode {
     DcMotorEx intakeMotor = null;
     DcMotorEx transferMotor = null;
     Servo kickerServo = null;
+
+    JoinedTelemetry joinedTelemetry = null;
 
     ElapsedTime shooterTimer = new ElapsedTime();
     ElapsedTime intakeTimer = new ElapsedTime();
@@ -63,6 +69,8 @@ public class DucksTeleOp extends LinearOpMode {
         intakeMotor = hardwareMap.get(DcMotorEx.class, "intakeMotor");
         transferMotor = hardwareMap.get(DcMotorEx.class, "transferMotor");
         kickerServo = hardwareMap.servo.get("kickerServo");
+
+        joinedTelemetry = new JoinedTelemetry(PanelsTelemetry.INSTANCE.getFtcTelemetry(), telemetry);
 
         boolean parked = false;
 
@@ -139,22 +147,22 @@ public class DucksTeleOp extends LinearOpMode {
 //                parked = !parked;
 //            }
 
-            telemetry.addData("shooter target tps", shooterTPS);
-            telemetry.addData("transfer target tps", transferTPS);
-            telemetry.addData("intake target tps", intakeTPS);
+            joinedTelemetry.addData("shooter target tps", shooterTPS);
+            joinedTelemetry.addData("transfer target tps", transferTPS);
+            joinedTelemetry.addData("intake target tps", intakeTPS);
 
-            telemetry.addData("shooter actual tps", shooterMotor.getVelocity());
-            telemetry.addData("transfer actual tps", transferMotor.getVelocity());
-            telemetry.addData("intake actual tps", intakeMotor.getVelocity());
+            joinedTelemetry.addData("shooter actual tps", shooterMotor.getVelocity());
+            joinedTelemetry.addData("transfer actual tps", transferMotor.getVelocity());
+            joinedTelemetry.addData("intake actual tps", intakeMotor.getVelocity());
 
-            telemetry.addData("shooter armed", shooterArmed);
-            telemetry.addData("transfer armed", transferArmed);
-            telemetry.addData("intake armed", intakeArmed);
+            joinedTelemetry.addData("shooter armed", shooterArmed);
+            joinedTelemetry.addData("transfer armed", transferArmed);
+            joinedTelemetry.addData("intake armed", intakeArmed);
 
-            telemetry.addData("chassis move", moveSens);
-            telemetry.addData("chassis turn", turnSens);
+            joinedTelemetry.addData("chassis move", moveSens);
+            joinedTelemetry.addData("chassis turn", turnSens);
 
-            telemetry.update();
+            joinedTelemetry.update();
         }
     }
     private void drive() {

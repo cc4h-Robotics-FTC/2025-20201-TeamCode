@@ -5,6 +5,8 @@ import static java.lang.Math.pow;
 import android.graphics.Color;
 import android.util.Size;
 
+import com.bylazar.telemetry.JoinedTelemetry;
+import com.bylazar.telemetry.PanelsTelemetry;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
@@ -61,8 +63,10 @@ public class ArtifactDistance extends LinearOpMode {
                 .setCamera(hardwareMap.get(WebcamName.class, "Webcam 1"))
                 .build();
 
-        telemetry.setMsTransmissionInterval(100);   // Speed up telemetry updates for debugging.
-        telemetry.setDisplayFormat(Telemetry.DisplayFormat.MONOSPACE);
+        JoinedTelemetry joinedTelemetry = new JoinedTelemetry(PanelsTelemetry.INSTANCE.getFtcTelemetry(), telemetry);
+
+        joinedTelemetry.setMsTransmissionInterval(100);   // Speed up telemetry updates for debugging.
+        joinedTelemetry.setDisplayFormat(Telemetry.DisplayFormat.MONOSPACE);
 
         waitForStart();
         while (opModeIsActive()) {
@@ -82,15 +86,15 @@ public class ArtifactDistance extends LinearOpMode {
             for (ColorBlobLocatorProcessor.Blob b : blobs) {
 
                 Circle circleFit = b.getCircle();
-                telemetry.addLine(String.format("R: %3.3f C: (%3.3f,%3.3f) D: %3.3f",
+                joinedTelemetry.addLine(String.format("R: %3.3f C: (%3.3f,%3.3f) D: %3.3f",
                         circleFit.getRadius(), circleFit.getX(), circleFit.getY(), getDist(circleFit.getRadius())));
             }
 
-            telemetry.update();
+            joinedTelemetry.update();
             sleep(100); // Match the telemetry update interval.
         }
     }
     public double getDist(double x) {
-        return 3.212752 + (129.5572 - 3.212752)/(1 + pow((x/8.588434), 1.314638));
+        return 722.24 * pow(x, -0.976);
     }
 }
