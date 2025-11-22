@@ -11,7 +11,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 @Config
 @TeleOp
-public class DucksTeleOp extends LinearOpMode {
+public class DucksTeleOpExp extends LinearOpMode {
     public static double shooterSpinUpTime = 3.0;
     public static double shooterSpinDownTime = 5.0;
     public static double shooterSpinUpPower = 1.0;
@@ -66,10 +66,6 @@ public class DucksTeleOp extends LinearOpMode {
 
         boolean parked = false;
 
-        // Reverse the right side motors. This may be wrong for your setup.
-        // If your robot moves backwards when commanded to go forwards,
-        // reverse the left side instead.
-        // See the note about this earlier on this page.
         frontLeftMotor.setDirection(DcMotorSimple.Direction.REVERSE);
         backLeftMotor.setDirection(DcMotorSimple.Direction.REVERSE);
 
@@ -93,51 +89,22 @@ public class DucksTeleOp extends LinearOpMode {
         if (isStopRequested()) return;
         while (opModeIsActive()) {
             drive();
-//            shooter.shoot(gamepad1.right_bumper, gamepad1.left_bumper, shooterTPS);
-//            shoot(gamepad1.a);1
-
-//            if (gamepad1.x){
-//                shooterState = ShooterState.IDLE;
-//            }
 
             if (gamepad1.dpadUpWasPressed()) { shooterTPS += shooterChangeTPS; }
             else if (gamepad1.dpadDownWasPressed()) { shooterTPS -= shooterChangeTPS; }
             else if (gamepad1.dpadLeftWasPressed()) { shooterTPS = -shooterTPS; }
             else if (gamepad1.dpadRightWasPressed()) { shooterArmed = !shooterArmed; }
 
-//            if (gamepad1.triangleWasPressed()) { intakeTPS += intakeChangeTPS; transferTPS += transferChangeTPS; }
-//            else if (gamepad1.crossWasPressed()) { intakeTPS -= intakeChangeTPS; transferTPS -= transferChangeTPS; }
-//            else if (gamepad1.squareWasPressed()) { intakeTPS = -intakeTPS; transferTPS = -transferTPS; }
-////            else if (gamepad1.circleWasPressed()) { intakeArmed = !intakeArmed; transferArmed = !transferArmed; }
-//
-//            if (gamepad1.squareWasPressed()) { intakeTPS = -intakeTPS; }
-//            if (gamepad1.triangleWasPressed()) { transferTPS = -transferTPS; }
-//            intakeArmed = gamepad1.cross;
-//            transferArmed = gamepad1.circle;
+//            shooterMotor.setVelocity(shooterTPS * (shooterArmed ? 1: 0));
+//            if (gamepad1.left_bumper && gamepad1.right_bumper) shooterMotor.setPower(1.0);
+//            intakeMotor.setPower((gamepad1.cross ? 1 : 0) - (gamepad1.square ? 1 : 0));
+//            transferMotor.setPower((gamepad1.circle ? 1 : 0) - (gamepad1.triangle ? 1 : 0));\
 
-
-            shooterMotor.setVelocity(shooterTPS * (shooterArmed ? 1: 0));
-            if (gamepad1.left_bumper && gamepad1.right_bumper) shooterMotor.setPower(1.0);
-            intakeMotor.setPower((gamepad1.cross ? 1 : 0) - (gamepad1.square ? 1 : 0));
-            transferMotor.setPower((gamepad1.circle ? 1 : 0) - (gamepad1.triangle ? 1 : 0));
-//            intakeMotor.setVelocity(intakeTPS * (intakeArmed ? 1 : 0));
-//            transferMotor.setVelocity(transferTPS * (transferArmed ? 1 : 0));
+            shooter.shoot(gamepad1.left_bumper, gamepad1.right_bumper, shooterTPS);
 
             if (shooterMotor.getVelocity() > shooterTPS - 200) gamepad1.rumble(100);
             else gamepad1.stopRumble();
 
-//            intakeMotor.setPower(gamepad1.left_trigger - gamepad1.right_trigger);
-
-//            if (!gamepad1.dpad_up && !parked) {
-//                kickerServo.setPosition(100);
-//            } else if (!gamepad1.dpad_up && !parked) {
-//                kickerServo.setPosition(100);
-//            }
-//
-//            if (gamepad1.dpadDownWasPressed()) {
-//                kickerServo.setPosition(0);
-//                parked = !parked;
-//            }
 
             telemetry.addData("shooter target tps", shooterTPS);
             telemetry.addData("transfer target tps", transferTPS);
@@ -150,6 +117,10 @@ public class DucksTeleOp extends LinearOpMode {
             telemetry.addData("shooter armed", shooterArmed);
             telemetry.addData("transfer armed", transferArmed);
             telemetry.addData("intake armed", intakeArmed);
+
+            telemetry.addData("shooter state", shooter.state);
+            telemetry.addData("shooter start", gamepad1.left_bumper);
+            telemetry.addData("shooter stop", gamepad1.right_bumper);
 
             telemetry.addData("chassis move", moveSens);
             telemetry.addData("chassis turn", turnSens);
