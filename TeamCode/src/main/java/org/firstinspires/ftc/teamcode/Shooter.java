@@ -23,12 +23,12 @@ public class Shooter {
         this.shooterMotor = shooterMotor;
     }
 
-    public void shoot(boolean start, boolean stop, int tps) {
+    public void shoot(boolean start, boolean stop, int tps, boolean auto) {
         switch (this.state) {
             case IDLE:
                 if (start) this.state = States.SPIN_UP; this.shots = 0;
+                break;
             case SPIN_UP:
-                intakeMotor.setPower(-0.5);
                 transferMotor.setPower(-0.5);
                 shooterMotor.setVelocity(tps);
                 if (shooterMotor.getVelocity() > tps - 200) {
@@ -36,19 +36,29 @@ public class Shooter {
                     intakeMotor.setPower(0);
                     transferMotor.setPower(0);
                 }
+                break;
             case FEED:
                 if (shooterMotor.getVelocity() > tps - 200) {
                     transferMotor.setPower(1);
-                    intakeMotor.setPower(1);
                 } else {
                     transferMotor.setPower(0);
                     intakeMotor.setPower(0);
                     this.shots++;
-                    this.state = States.SPIN_UP;
+                    if (auto && this.shots >= 3) this.state = States.SPIN_DOWN;
+                    else this.state = States.SPIN_UP;
                 }
                 if (stop) this.state = States.SPIN_DOWN;
+                break;
             case SPIN_DOWN:
                 shooterMotor.setVelocity(0);
+                transferMotor.setPower(0);
+                intakeMotor.setPower(0);
+                this.state = States.IDLE;
+                break;
         }
+    }
+
+    public void shoot() {
+
     }
 }

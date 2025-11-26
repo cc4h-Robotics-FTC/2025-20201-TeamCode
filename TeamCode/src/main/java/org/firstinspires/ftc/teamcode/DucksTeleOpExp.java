@@ -71,7 +71,7 @@ public class DucksTeleOpExp extends LinearOpMode {
         frontLeftMotor.setDirection(DcMotorSimple.Direction.REVERSE);
         backLeftMotor.setDirection(DcMotorSimple.Direction.REVERSE);
 
-        shooterMotor.setDirection(DcMotorSimple.Direction.REVERSE);
+//        shooterMotor.setDirection(DcMotorSimple.Direction.REVERSE);
         transferMotor.setDirection(DcMotorSimple.Direction.REVERSE);
 
         shooterMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -102,7 +102,7 @@ public class DucksTeleOpExp extends LinearOpMode {
 //            intakeMotor.setPower((gamepad1.cross ? 1 : 0) - (gamepad1.square ? 1 : 0));
 //            transferMotor.setPower((gamepad1.circle ? 1 : 0) - (gamepad1.triangle ? 1 : 0));\
 
-            shooter.shoot(gamepad1.left_bumper, gamepad1.right_bumper, shooterTPS);
+            shooter.shoot(gamepad1.left_bumper, gamepad1.right_bumper, shooterTPS, false);
 
             if (shooterMotor.getVelocity() > shooterTPS - 200) gamepad1.rumble(100);
             else gamepad1.stopRumble();

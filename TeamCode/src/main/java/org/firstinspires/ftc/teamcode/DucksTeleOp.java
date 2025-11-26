@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.acmerobotics.dashboard.config.Config;
+import com.bylazar.camerastream.PanelsCameraStream;
 import com.bylazar.configurables.annotations.Configurable;
 import com.bylazar.telemetry.JoinedTelemetry;
 import com.bylazar.telemetry.PanelsTelemetry;
@@ -11,6 +12,9 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
+
+import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
+import org.firstinspires.ftc.vision.VisionPortal;
 
 @Config
 @Configurable
@@ -70,6 +74,15 @@ public class DucksTeleOp extends LinearOpMode {
         transferMotor = hardwareMap.get(DcMotorEx.class, "transferMotor");
         kickerServo = hardwareMap.servo.get("kickerServo");
 
+        StreamProcesser.Processor processor = new StreamProcesser.Processor();
+
+        new VisionPortal.Builder()
+                .addProcessor(processor)
+                .setCamera(hardwareMap.get(WebcamName.class, "Webcam 1"))
+                .build();
+
+        PanelsCameraStream.INSTANCE.startStream(processor, 60);
+
         joinedTelemetry = new JoinedTelemetry(PanelsTelemetry.INSTANCE.getFtcTelemetry(), telemetry);
 
         boolean parked = false;
@@ -81,7 +94,7 @@ public class DucksTeleOp extends LinearOpMode {
         frontLeftMotor.setDirection(DcMotorSimple.Direction.REVERSE);
         backLeftMotor.setDirection(DcMotorSimple.Direction.REVERSE);
 
-        shooterMotor.setDirection(DcMotorSimple.Direction.REVERSE);
+//        shooterMotor.setDirection(DcMotorSimple.Direction.REVERSE);
         transferMotor.setDirection(DcMotorSimple.Direction.REVERSE);
 
         shooterMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
